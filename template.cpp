@@ -64,16 +64,40 @@ struct Point
 		double _y=a.y*cos(angle)+a.x*sin(angle);
 		return Point(_x,_y);
 	}
-	  //Orientation
-       // 1 ->Counter-Clockwise
-       // 0 ->Colinear
-       //-1 ->Clockwise.
-    int Orientation(Point a,Point b,Point c)//a->b,b->c.
+
+Point p0;
+ int Orientation(Point a, Point b, Point c)// a-b and b->c.
+{
+    double val=Cross(b-a,c-a);
+    return CmpDouble(val);
+    /*
+        Orientation
+        0 -> Colinear.
+        1 -> CounterClockwise.
+        -1-> Clockwise.
+    */
+}
+bool compare(const Point& p1, const Point &p2)
+{
+   int o = Orientation(p0, p1, p2);
+   if (o == 0)
+     return (DistanceBetweenPoints(p0, p1)<=DistanceBetweenPoints(p0, p2));
+   return (o == 1)? true:false;
+}
+
+    bool ArrangeCounterClockWisePoint(Point p[],int n)
     {
-        int val=Cross(b-a,c-a);
-        if(val==0) return 0;
-        if(val>0) return 1;
-    return -1;
+        int ymin=p[0].y,indx=0;
+        for(int i=1;i<n;i++)
+        {
+            if((p[i].y<ymin) or (p[i].y==ymin and p[i].x<p[indx].x))
+            {
+                ymin=p[i].y,indx=i;
+            }
+        }
+        swap(p[0],p[indx]);
+        p0=p[0];
+        sort(p+1,p+n,compare);
     }
 struct Line
 {
@@ -178,12 +202,41 @@ double Slope(Line l)// returns slope in degrees.
 		if(CmpDouble(temp-PI)==0)temp-=PI;
 		return RadianToDegree(temp);
 }
-
-main(int argc,char* argv[])
+Line PerpendicularBisector(Line l)
 {
-    Point a,b,c,d;
-    while(1){
-    a.input(),b.input(),c.input(),d.input();
-    cout<<DoIntersect(Line(a,b),Line(c,d));
+    Point m=Point((l.a.x+l.b.x)/2.0,(l.a.y+l.b.y)/2.0);
+    double A,B,C;
+    A=l.a.x-l.b.x;
+    B=l.a.y-l.b.y;
+    C=A*m.x+B*m.y;
+    return Line(A,B,C);
+
+}
+struct Circle{
+double x,y,r;
+    Circle(double a,double b,double c):x(a),y(b),r(r){}
+    void input()
+    {
+        scanf("%lf %lf %lf",&x,&y,&r);
     }
+    void output()
+    {
+        printf("Centre of circle : %lf %lf\n",x,y);
+        printf("Radius of cicle : %lf\n",r);
+    }
+    Circle(Point a,Point b,Point c)
+    {
+        Point p[3];
+        p[0]=a,p[1]=b,p[2]=c;
+        ArrangeCounterClockWisePoint(p,3);
+        Point centre;
+        if(IntersectionLines(Line(p[0],p[1]),Line(p[1],p[2]),centre))
+            r=DistanceBetweenPoints(centre,p[0]);
+        else
+            printf("Circle Not Possible\n");
+    }
+};
+main()
+{
+
 }
