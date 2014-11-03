@@ -7,7 +7,7 @@ const double PI= acos(-1);
 const double EPS = 1e-8;
 const double INF =(1<<20);
 
-int CmpDouble(double d)
+int CmpDouble(double d)//compare real values with EPS rather then 0.
 {
 	if(fabs(d)<EPS) return 0;
 	return d>EPS?1:-1;
