@@ -33,6 +33,8 @@ double DistanceLineToPoint(Line l,Point p);// calculates distance from point to 
 double Slope(Line l);// calculate slope of a line/segment.
 Line PerpendicularBisector(Line l);// calculate perpendicular bisector eqn of a segment.
 
+/* Function related to circles */
+int IntersectionCircleLine(Circle c,Line l,Point& p1,Point& p2);// return number of intersections [0,2]. and intersection points.
 struct Point
 {
 	double x,y;
@@ -176,7 +178,6 @@ bool CompareOrientation(const Point& p1, const Point &p2)
         return (DistanceBetweenPoints(p0, p1)<=DistanceBetweenPoints(p0, p2));
         return (o == 1)? true:false;
 }
-
 bool ArrangeCounterClockWisePoint(Point p[],int n)
 { // arrange points in CounterClockwise Order from wrt Point with min y co-ordinate.
     int ymin=p[0].y,indx=0;
@@ -250,4 +251,22 @@ Line PerpendicularBisector(Line l)
 
 }
 
+int IntersectionCircleLine(Circle c,Line l,Point& p1,Point& p2)// return number of intersection
+{// if 1 intersection stores in p1
+    double x0,y0;
+    x0=(l.A*l.C)/(sqr(l.A)+sqr(l.B));
+    y0=(l.B*l.C)/(sqr(l.A)+sqr(l.B));
+    double val=DistanceBetweenPoints(Point(x0,y0),Point(c.x,c.y));
+    if(val>c.r) return 0;
+    if(CmpDouble(val-c.r)==0){p1.x=x0,p1.y=y0;return 1;}
 
+    double d =sqr(c.r)-(sqr(l.C)/(sqr(l.A)+sqr(l.B)));
+	double mult = sqrt(d/(sqr(l.A) +sqr(l.B)));
+	double ax, ay, bx, by;
+	ax = x0 + l.B * mult;
+	bx = x0 - l.B * mult;
+	ay = y0 - l.A * mult;
+	by = y0 + l.A * mult;
+	p1.x=ax,p1.y=ay,p2.x=bx,p2.y=by;
+return 2;
+}
