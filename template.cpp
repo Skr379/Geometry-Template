@@ -35,6 +35,7 @@ Line PerpendicularBisector(Line l);// calculate perpendicular bisector eqn of a 
 
 /* Function related to circles */
 int IntersectionCircleLine(Circle c,Line l,Point& p1,Point& p2);// return number of intersections [0,2]. and intersection points.
+int IntersectionCircles(Circle c1,Circle c2,Point &p1,Point &p2);// return number of intersections [0,2]. and intersection points.
 struct Point
 {
 	double x,y;
@@ -110,7 +111,7 @@ struct Circle{
 double x,y,r;
     Circle(){}
     Circle(double a,double b,double c):x(a),y(b),r(c){}
-    void inp()
+    void in()
     {
         scanf("%lf %lf %lf",&x,&y,&r);
     }
@@ -131,11 +132,24 @@ double x,y,r;
             printf("Circle Not Possible\n");
     }
     bool operator == (Circle c){return (CmpDouble(x-c.x)==0 and CmpDouble(y-c.y)==0 and CmpDouble(r-c.r)==0);}
+    double Circumference(){return 2*PI*r;}
+    double Area(){return PI*r*r;}
 };
 
 int main()
 {
-    cout<<(c1==c2);
+    Circle c1,c2;
+    c1.in(),c2.in();
+    Point p1,p2;
+    int x=IntersectionCircles(c1,c2,p1,p2);
+    if(x==1)
+        p1.out();
+    if(x==2)
+    {
+        p1.out();p2.out();
+    }
+    if(x==INF)
+        cout<<"Infinite intersection points.\n";
 }
 
 int CmpDouble(double d)//compare real values with EPS rather then 0.
@@ -251,15 +265,24 @@ Line PerpendicularBisector(Line l)
 
 }
 
-int IntersectionCircleLine(Circle c,Line l,Point& p1,Point& p2)// return number of intersection
+int IntersectionCircleLine(Circle c,Line l1,Point& p1,Point& p2)// return number of intersection
 {// if 1 intersection stores in p1
     double x0,y0;
+    Point diff(0,0),temp1=l1.a,temp2=l1.b;
+    if(CmpDouble(c.x)!=0 or CmpDouble(c.y)!=0)// circle is not at origin.
+    {//transform circle to origin and transform line also.
+        diff.x=c.x,diff.y=c.y;
+        temp1=l1.a-diff;
+        temp2=l1.b-diff;
+        c.x-=diff.x,c.y-=diff.y;
+    }
+
+    Line l(temp1,temp2);
     x0=(l.A*l.C)/(sqr(l.A)+sqr(l.B));
     y0=(l.B*l.C)/(sqr(l.A)+sqr(l.B));
     double val=DistanceBetweenPoints(Point(x0,y0),Point(c.x,c.y));
     if(val>c.r) return 0;
-    if(CmpDouble(val-c.r)==0){p1.x=x0,p1.y=y0;return 1;}
-
+    if(CmpDouble(val-c.r)==0){p1.x=x0,p1.y=y0; p1=p1+diff; return 1;}
     double d =sqr(c.r)-(sqr(l.C)/(sqr(l.A)+sqr(l.B)));
 	double mult = sqrt(d/(sqr(l.A) +sqr(l.B)));
 	double ax, ay, bx, by;
@@ -268,5 +291,22 @@ int IntersectionCircleLine(Circle c,Line l,Point& p1,Point& p2)// return number 
 	ay = y0 - l.A * mult;
 	by = y0 + l.A * mult;
 	p1.x=ax,p1.y=ay,p2.x=bx,p2.y=by;
+	p1=p1+diff;p2=p2+diff;
 return 2;
+}
+int IntersectionCircles(Circle c1,Circle c2,Point &p1,Point &p2)
+{
+    if(Point(c1.x,c1.y)==Point(c2.x,c2.y)){
+        if(CmpDouble(c1.r-c2.r)==0) return INF;
+        return 0;
+    }
+    Point diff(c1.x,c1.y);
+    c1.x-=diff.x,c1.y-=diff.y;
+    c2.x-=diff.x,c2.y-=diff.y;
+    double a,b,c;
+    a=2*c2.x;
+    b=2*c2.y;
+    c=sqr(c1.r)-sqr(c2.r)+sqr(c2.x)+sqr(c2.y);
+    Line l(a,b,c);
+    return IntersectionCircleLine(c1,l,p1,p2);
 }
