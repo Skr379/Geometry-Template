@@ -211,13 +211,9 @@ vector<Point> ConvexHull(Point p[],int n)
     hull.push_back(p[0]);hull.push_back(p[1]);hull.push_back(p[2]);
     for(int i=3;i<n;i++)
     {
-        cout<<"Before\n";
-        for(int i=0;i<hull.size();i++)hull[i].out();
         while(Orientation(hull[hull.size()-2],hull[hull.size()-1],p[i])==-1)
             hull.pop_back();
         hull.push_back(p[i]);
-        cout<<"After\n";
-        for(int i=0;i<hull.size();i++)hull[i].out();
     }
 
 return hull;
