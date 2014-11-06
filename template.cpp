@@ -24,6 +24,7 @@ Point RotatePoint(Point a,double angle);//rotate a point anticlockwise by given 
 int Orientation(Point a, Point b, Point c);// calculates orientation from a->b and b->c.
 bool CompareOrientation(const Point& p1, const Point &p2);// for sorting function in convex hull.
 bool ArrangeCounterClockWisePoint(Point p[],int n);// arrange points in counter clockwise order.
+vector<Point> ConvexHull(Point p[],int n);//returns vector of points on convex hull.
 
 /* Function related to Lines */
 bool PointOnSegment(Line l,Point p);// check if point lies on a line segment.
@@ -138,18 +139,15 @@ double x,y,r;
 
 int main()
 {
-    Circle c1,c2;
-    c1.in(),c2.in();
-    Point p1,p2;
-    int x=IntersectionCircles(c1,c2,p1,p2);
-    if(x==1)
-        p1.out();
-    if(x==2)
-    {
-        p1.out();p2.out();
-    }
-    if(x==INF)
-        cout<<"Infinite intersection points.\n";
+
+   int n;
+   cin>>n;
+   Point p[n];
+   for(int i=0;i<n;i++)p[i].in();
+  vector<Point> hull=ConvexHull(p,n);
+  cout<<hull.size()<<endl;
+   for(int i=0;i<hull.size();i++)hull[i].out();
+
 }
 
 int CmpDouble(double d)//compare real values with EPS rather then 0.
@@ -173,8 +171,8 @@ Point RotatePoint(Point a,double angle)//CounterClockwise rotation
 	double _y=a.y*cos(angle)+a.x*sin(angle);
 	return Point(_x,_y);
 }
-
 Point p0;
+
 int Orientation(Point a, Point b, Point c)
 { // Orientation from a->b and b->c.
     double val=Cross(b-a,c-a);
@@ -205,6 +203,24 @@ bool ArrangeCounterClockWisePoint(Point p[],int n)
         swap(p[0],p[indx]);// swaps (p[0],ymin).
         p0=p[0];
         sort(p+1,p+n,CompareOrientation);//sort wrt p0;
+}
+vector<Point> ConvexHull(Point p[],int n)
+{
+    ArrangeCounterClockWisePoint(p,n);
+    vector<Point> hull;
+    hull.push_back(p[0]);hull.push_back(p[1]);hull.push_back(p[2]);
+    for(int i=3;i<n;i++)
+    {
+        cout<<"Before\n";
+        for(int i=0;i<hull.size();i++)hull[i].out();
+        while(Orientation(hull[hull.size()-2],hull[hull.size()-1],p[i])==-1)
+            hull.pop_back();
+        hull.push_back(p[i]);
+        cout<<"After\n";
+        for(int i=0;i<hull.size();i++)hull[i].out();
+    }
+
+return hull;
 }
 bool PointOnSegment(Line l,Point p)
 {// check if point lies on line segnemt.
