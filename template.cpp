@@ -11,32 +11,38 @@ struct Point;
 struct Line;
 struct Circle;
 
+
 int CmpDouble(double d);// compares double value with EPS.
-/* Function related to Points */
 double RadianToDegree(double x);//converts radian to degrees.
 double DegreeToRadian(double x);//converts degree to readian.
-double DistancePointFromOrigin(Point p);// calculate distance of point from (0,0).
-double SqrDistanceFromOrigin(Point p); // calculate square distance of point from (0,0).
-double DistanceBetweenPoints(Point a,Point b);//calculate distance between 2 points.
-double Dot(Point a,Point b); // calculates dot product.
-double Cross(Point a,Point b);//calculates cross product.
-Point RotatePoint(Point a,double angle);//rotate a point anticlockwise by given angle.
-int Orientation(Point a, Point b, Point c);// calculates orientation from a->b and b->c.
-bool CompareOrientation(const Point& p1, const Point &p2);// for sorting function in convex hull.
-bool ArrangeCounterClockWisePoint(Point p[],int n);// arrange points in counter clockwise order.
-vector<Point> ConvexHull(Point p[],int n);//returns vector of points on convex hull.
+double sqr(double x);//returns square of a number.
 
-/* Function related to Lines */
-bool PointOnSegment(Line l,Point p);// check if point lies on a line segment.
-bool DoIntersect(Line l1,Line l2);// check wether 2 line segments intersects.
-bool IntersectionLines(Line l1,Line l2,Point &p);// calculate intersection of lines and stores in p.
-double DistanceLineToPoint(Line l,Point p);// calculates distance from point to line.
-double Slope(Line l);// calculate slope of a line/segment.
-Line PerpendicularBisector(Line l);// calculate perpendicular bisector eqn of a segment.
+/* Function related to Points and Vectors*/
+double DistancePointFromOrigin(Point p);// calculate distance of point from Origin.
+double SqrDistanceFromOrigin(Point p); // calculate square distance of point from Origin.
+double DistanceBetweenPoints(Point a,Point b);//calculate distance between 2 points.
+double Dot(Point a,Point b); // calculates dot product of vectors.
+double Cross(Point a,Point b);//calculates cross product of vectors.
+Point  RotatePoint(Point a,double angle);//rotate a point anticlockwise by given angle.
+int    Orientation(Point a, Point b, Point c);// calculates orientation from a->b and b->c.
+bool   CompareOrientation(const Point& p1, const Point &p2);// for sorting function in convex hull.
+bool   ArrangeCounterClockWisePoint(Point p[],int n);// arrange points in counter clockwise order.
+vector<Point> ConvexHull(Point p[],int n);//returns vector of points on convex hull.
+double ClosestPair(Point p[],int lo,int hi);// find the distance between closest pair of points.
+
+/* Function related to Lines and Line Segments */
+bool    PointOnSegment(Line l,Point p);// check if point lies on a line segment.
+bool    DoIntersect(Line l1,Line l2);// check wether 2 line segments intersects.
+bool    IntersectionLines(Line l1,Line l2,Point &p);// calculate intersection of lines and stores in p.
+double  DistanceLineToPoint(Line l,Point p);// calculates distance from point to line.
+double  Slope(Line l);// calculate slope of a line/segment.
+Line    PerpendicularBisector(Line l);// calculate perpendicular bisector eqn of a line segment.
 
 /* Function related to circles */
-int IntersectionCircleLine(Circle c,Line l,Point& p1,Point& p2);// return number of intersections [0,2]. and intersection points.
-int IntersectionCircles(Circle c1,Circle c2,Point &p1,Point &p2);// return number of intersections [0,2]. and intersection points.
+int IntersectionCircleLine(Circle c,Line l,Point& p1,Point& p2);// return number of intersections [0,2], and intersection points.
+int IntersectionCircles(Circle c1,Circle c2,Point &p1,Point &p2);// return number of intersections [0,2], and intersection points.
+int RelationCircles(Circle c1,Circle c2);//Returns relation between 2 Circles.
+int RelatonCirclePoint(Circle c,Point p);// checks wether points lies inside,on circu,ference or outside circle [-1,0,1].
 struct Point
 {
 	double x,y;
@@ -132,6 +138,7 @@ double x,y,r;
         else
             printf("Circle Not Possible\n");
     }
+    Point Centre(){return Point(x,y);}
     bool operator == (Circle c){return (CmpDouble(x-c.x)==0 and CmpDouble(y-c.y)==0 and CmpDouble(r-c.r)==0);}
     double Circumference(){return 2*PI*r;}
     double Area(){return PI*r*r;}
@@ -139,17 +146,17 @@ double x,y,r;
 
 int main()
 {
-
-   int n;
-   cin>>n;
-   Point p[n];
-   for(int i=0;i<n;i++)p[i].in();
-  vector<Point> hull=ConvexHull(p,n);
-  cout<<hull.size()<<endl;
-   for(int i=0;i<hull.size();i++)hull[i].out();
+   Circle c;
+    c.in();
+   Point p;
+   while(true){
+   p.in();
+   cout<<RelatonCirclePoint(c,p)<<"\n";
+   }
 
 }
 
+//Utility Functions.
 int CmpDouble(double d)//compare real values with EPS rather then 0.
 {
 	if(fabs(d)<EPS) return 0; // if d<EPS.
@@ -159,6 +166,7 @@ double RadianToDegree(double x){ return (double)x*(180.0/PI); }
 double DegreeToRadian(double x){ return (double)x*(PI/180.0); }
 inline double sqr(double x){return x*x;}
 
+// Function Defination (Points, Vectors).
 double DistancePointFromOrigin(Point p)      { return hypot(p.x,p.y);	     }
 double SqrDistanceFromOrigin(Point p)        {	return p.x*p.x+p.y*p.y;	     }
 double DistanceBetweenPoints(Point a,Point b){ return hypot(a.x-b.x,a.y-b.y);}
@@ -171,8 +179,8 @@ Point RotatePoint(Point a,double angle)//CounterClockwise rotation
 	double _y=a.y*cos(angle)+a.x*sin(angle);
 	return Point(_x,_y);
 }
-Point p0;
 
+Point p0;// point with smallest y co-ordinate for arranging Counter Clockwise.
 int Orientation(Point a, Point b, Point c)
 { // Orientation from a->b and b->c.
     double val=Cross(b-a,c-a);
@@ -186,8 +194,8 @@ int Orientation(Point a, Point b, Point c)
 bool CompareOrientation(const Point& p1, const Point &p2)
 {
     int o = Orientation(p0, p1, p2);
-        if (o == 0)
-        return (DistanceBetweenPoints(p0, p1)<=DistanceBetweenPoints(p0, p2));
+        if (o == 0) //three points are colinear.
+        return (DistanceBetweenPoints(p0, p1)<=DistanceBetweenPoints(p0, p2));//return point with smallest distance.
         return (o == 1)? true:false;
 }
 bool ArrangeCounterClockWisePoint(Point p[],int n)
@@ -218,6 +226,8 @@ vector<Point> ConvexHull(Point p[],int n)
 
 return hull;
 }
+
+// Function Definition related to Lines.
 bool PointOnSegment(Line l,Point p)
 {// check if point lies on line segnemt.
     if(CmpDouble(Cross(p-l.a,l.b-l.a)==0))
@@ -321,4 +331,31 @@ int IntersectionCircles(Circle c1,Circle c2,Point &p1,Point &p2)
     c=sqr(c1.r)-sqr(c2.r)+sqr(c2.x)+sqr(c2.y);
     Line l(a,b,c);
     return IntersectionCircleLine(c1,l,p1,p2);
+}
+int RelationCircles(Circle c1,Circle c2)// returns relation between two circles.
+{
+    Point Origin(0,0);
+    if(c1==c2) return 0;//both circles are identical.
+    if(Point(c1.x,c2.y)==Point(c2.x,c2.y))//concentric
+    {
+        if(c1.r<c2.r) return 1;// cencentric c1 inside c2, no intersection.
+        else
+            return 2;//concentric c2 inside c1, no intersection.
+    }
+    double val=DistanceBetweenPoints(c1.Centre(),c2.Centre());
+    if(val+min(c1.r,c2.r)<max(c1.r,c2.r)) return 3; // one circle inside another , no intersection.
+    if(CmpDouble(val+min(c1.r,c2.r)-max(c1.r,c2.r))==0) return 4;// one circle inside another, 1 intersection point.
+    if(CmpDouble((c1.r+c2.r)-val)==1) return 5; // intersecting at 1 point.
+    if(CmpDouble((c1.r+c2.r)-val)==0) return 6; // touching at 1 point.
+return 7;//caircles are far apart, no intersection.
+}
+int RelatonCirclePoint(Circle c,Point p)
+{// checks where points lies w.r.t circle.
+    double val=DistanceBetweenPoints(c.Centre(),p);
+    return CmpDouble(val-c.r);
+    /*
+        -1 inside circle.
+         0 on circle boundary.
+         1 outsied circle.
+    */
 }
