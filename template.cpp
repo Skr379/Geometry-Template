@@ -2,6 +2,8 @@
 #define PB push_back
 #define MP make_pair
 #define error  1
+
+#define MAX_POINT 1000
 using namespace std;
 const double PI= acos(-1);
 const double EPS = 1e-8;
@@ -16,6 +18,8 @@ int CmpDouble(double d);// compares double value with EPS.
 double RadianToDegree(double x);//converts radian to degrees.
 double DegreeToRadian(double x);//converts degree to readian.
 double sqr(double x);//returns square of a number.
+bool compY(const Point &a,const Point &b);// sort point by y cordinate.
+bool compX(const Point &a,const Point &b);// sort point by x cordinate.
 
 /* Function related to Points and Vectors*/
 double DistancePointFromOrigin(Point p);// calculate distance of point from Origin.
@@ -26,9 +30,9 @@ double Cross(Point a,Point b);//calculates cross product of vectors.
 Point  RotatePoint(Point a,double angle);//rotate a point anticlockwise by given angle.
 int    Orientation(Point a, Point b, Point c);// calculates orientation from a->b and b->c.
 bool   CompareOrientation(const Point& p1, const Point &p2);// for sorting function in convex hull.
-void   ArrangeCounterClockWisePoint(Point p[],int n);// arrange points in counter clockwise order.
+bool   ArrangeCounterClockWisePoint(Point p[],int n);// arrange points in counter clockwise order.
 vector<Point> ConvexHull(Point p[],int n);//returns vector of points on convex hull.
-double ClosestPair(Point p[],int lo,int hi);// find the distance between closest pair of points.
+double ClosestPair(Point p[],int n);// find the distance between closest pair of points.
 
 /* Function related to Lines and Line Segments */
 bool    PointOnSegment(Line l,Point p);// check if point lies on a line segment.
@@ -110,6 +114,7 @@ struct Line
 	// Only if Line is given in 2 point form.
 	bool operator == (Line  l)
 	{
+		Line p=*this;
 		return (a==l.a and b==l.b);
 	}
 	void out(){
@@ -119,8 +124,7 @@ struct Line
 };
 
 struct Circle{
-    double x,y,r;
-    bool valid;
+double x,y,r;
     Circle(){}
     Circle(double a,double b,double c):x(a),y(b),r(c){}
     void in()
@@ -134,7 +138,6 @@ struct Circle{
     }
     Circle(Point a,Point b,Point c)// circle passing through 3 points.
     {
-        valid = true;
         Point p[3];
         p[0]=a,p[1]=b,p[2]=c;
         ArrangeCounterClockWisePoint(p,3);
@@ -142,16 +145,13 @@ struct Circle{
         if(IntersectionLines(Line(p[0],p[1]),Line(p[1],p[2]),centre))
             r=DistanceBetweenPoints(centre,p[0]);
         else
-            valid = false;
+            printf("Circle Not Possible\n");
     }
     Point Centre(){return Point(x,y);}
     bool operator == (Circle c){return (CmpDouble(x-c.x)==0 and CmpDouble(y-c.y)==0 and CmpDouble(r-c.r)==0);}
     double Circumference(){return 2*PI*r;}
     double Area(){return PI*r*r;}
 };
-
-
-
 
 //Utility Functions.
 int CmpDouble(double d)//compare real values with EPS rather then 0.
@@ -162,6 +162,18 @@ int CmpDouble(double d)//compare real values with EPS rather then 0.
 double RadianToDegree(double x){ return (double)x*(180.0/PI); }
 double DegreeToRadian(double x){ return (double)x*(PI/180.0); }
 inline double sqr(double x){return x*x;}
+bool compY(const Point &a,const Point &b)// sort point by Y cordinate.
+{
+    if(a.y<b.y)return true;
+    if(a.y==b.y and a.x<b.x) return true;
+return false;
+}
+bool compX(const Point &a,const Point &b)// sort point by x xordinate.
+{
+    if(a.x<b.x)return true;
+    if(a.x==b.x and a.y<b.y) return true;
+return false;
+}
 
 // Function Defination (Points, Vectors).
 double DistancePointFromOrigin(Point p)      { return hypot(p.x,p.y);	     }
@@ -195,7 +207,7 @@ bool CompareOrientation(const Point& p1, const Point &p2)
         return (DistanceBetweenPoints(p0, p1)<=DistanceBetweenPoints(p0, p2));//return point with smallest distance.
         return (o == 1)? true:false;
 }
-void ArrangeCounterClockWisePoint(Point p[],int n)
+bool ArrangeCounterClockWisePoint(Point p[],int n)
 { // arrange points in CounterClockwise Order from wrt Point with min y co-ordinate.
     int ymin=p[0].y,indx=0;
     for(int i=1;i<n;i++)
@@ -224,6 +236,38 @@ vector<Point> ConvexHull(Point p[],int n)
 return hull;
 }
 
+double min_dist;// for closest pair of point.
+Point strip[MAX_POINT];
+// Utility function for ClosestPair()
+void find_closest(Point pt[],int lo,int hi)
+{
+    if(hi-lo+1<=3)// brute force when group is small.
+    {
+        for(int i=lo;i<=hi;i++)
+            for(int j=i+1;j<=hi;j++)
+                    min_dist=min(min_dist,DistanceBetweenPoints(pt[i],pt[j]));
+        return;
+    }
+    int mid=(lo+hi)/2;// divide group in 2 parts.
+    find_closest(pt,lo,mid);//calculate minimum for left part.
+    find_closest(pt,mid+1,hi);//calculate minimum for right part.
+    double m=(pt[mid].x+pt[mid+1].x)/2.0;// collect point from left and right with dist within min_dist.
+    int indx=0;
+    for(int i=lo;i<=hi;i++){
+        if(fabs(m-pt[i].x)<=min_dist)
+            strip[indx++]=pt[i];
+    }
+    sort(strip,strip+indx,compY);// sort strip by y coridnate.
+    for(int i=0;i<indx;i++)
+        for(int j=i+1;j<indx and DistanceBetweenPoints(strip[i],strip[j])<min_dist;j++)// check for next 7 consecutive points
+           min_dist=DistanceBetweenPoints(strip[i],strip[j]);//
+}
+double ClosestPair(Point p[],int n)
+{   min_dist=(1e21);
+    sort(p,p+n,compX);
+    find_closest(p,0,n-1);
+    return min_dist;
+}
 // Function Definition related to Lines.
 bool PointOnSegment(Line l,Point p)
 {// check if point lies on line segnemt.
