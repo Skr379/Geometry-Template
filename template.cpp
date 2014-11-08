@@ -26,7 +26,7 @@ double Cross(Point a,Point b);//calculates cross product of vectors.
 Point  RotatePoint(Point a,double angle);//rotate a point anticlockwise by given angle.
 int    Orientation(Point a, Point b, Point c);// calculates orientation from a->b and b->c.
 bool   CompareOrientation(const Point& p1, const Point &p2);// for sorting function in convex hull.
-bool   ArrangeCounterClockWisePoint(Point p[],int n);// arrange points in counter clockwise order.
+void   ArrangeCounterClockWisePoint(Point p[],int n);// arrange points in counter clockwise order.
 vector<Point> ConvexHull(Point p[],int n);//returns vector of points on convex hull.
 double ClosestPair(Point p[],int lo,int hi);// find the distance between closest pair of points.
 
@@ -105,7 +105,6 @@ struct Line
 	// Only if Line is given in 2 point form.
 	bool operator == (Line  l)
 	{
-		Line p=*this;
 		return (a==l.a and b==l.b);
 	}
 	void out(){
@@ -115,7 +114,8 @@ struct Line
 };
 
 struct Circle{
-double x,y,r;
+    double x,y,r;
+    bool valid;
     Circle(){}
     Circle(double a,double b,double c):x(a),y(b),r(c){}
     void in()
@@ -129,6 +129,7 @@ double x,y,r;
     }
     Circle(Point a,Point b,Point c)// circle passing through 3 points.
     {
+        valid = true;
         Point p[3];
         p[0]=a,p[1]=b,p[2]=c;
         ArrangeCounterClockWisePoint(p,3);
@@ -136,7 +137,7 @@ double x,y,r;
         if(IntersectionLines(Line(p[0],p[1]),Line(p[1],p[2]),centre))
             r=DistanceBetweenPoints(centre,p[0]);
         else
-            printf("Circle Not Possible\n");
+            valid = false;
     }
     Point Centre(){return Point(x,y);}
     bool operator == (Circle c){return (CmpDouble(x-c.x)==0 and CmpDouble(y-c.y)==0 and CmpDouble(r-c.r)==0);}
@@ -144,7 +145,7 @@ double x,y,r;
     double Area(){return PI*r*r;}
 };
 
-int main()
+/*int main()
 {
    Circle c;
     c.in();
@@ -154,7 +155,7 @@ int main()
    cout<<RelatonCirclePoint(c,p)<<"\n";
    }
 
-}
+}*/
 
 //Utility Functions.
 int CmpDouble(double d)//compare real values with EPS rather then 0.
@@ -198,7 +199,7 @@ bool CompareOrientation(const Point& p1, const Point &p2)
         return (DistanceBetweenPoints(p0, p1)<=DistanceBetweenPoints(p0, p2));//return point with smallest distance.
         return (o == 1)? true:false;
 }
-bool ArrangeCounterClockWisePoint(Point p[],int n)
+void ArrangeCounterClockWisePoint(Point p[],int n)
 { // arrange points in CounterClockwise Order from wrt Point with min y co-ordinate.
     int ymin=p[0].y,indx=0;
     for(int i=1;i<n;i++)
@@ -359,3 +360,4 @@ int RelatonCirclePoint(Circle c,Point p)
          1 outsied circle.
     */
 }
+
