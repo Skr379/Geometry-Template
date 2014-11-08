@@ -42,7 +42,12 @@ Line    PerpendicularBisector(Line l);// calculate perpendicular bisector eqn of
 int IntersectionCircleLine(Circle c,Line l,Point& p1,Point& p2);// return number of intersections [0,2], and intersection points.
 int IntersectionCircles(Circle c1,Circle c2,Point &p1,Point &p2);// return number of intersections [0,2], and intersection points.
 int RelationCircles(Circle c1,Circle c2);//Returns relation between 2 Circles.
-int RelatonCirclePoint(Circle c,Point p);// checks wether points lies inside,on circu,ference or outside circle [-1,0,1].
+int RelatonCirclePoint(Circle c,Point p);// checks wether points lies inside,on circumference or outside circle [-1,0,1].
+
+/*Function related to Polygon */
+double PolygonArea(Point p[],int n);//returns are of polygon.
+int RelationPointPolygon(Point poly[],int n,Point p);//checks wether point lies inside, on polygon or outsie polygon.[-1,0,1].
+
 struct Point
 {
 	double x,y;
@@ -144,14 +149,19 @@ double x,y,r;
     double Area(){return PI*r*r;}
 };
 
+Point p[10000+10];
 int main()
 {
-   Circle c;
-    c.in();
-   Point p;
-   while(true){
-   p.in();
-   cout<<RelatonCirclePoint(c,p)<<"\n";
+   int test;
+   scanf("%d",&test);
+   while(test--)
+   {
+       int n;
+       scanf("%d",&n);
+       for(int i=0;i<n;i++)scanf("%lf",&p[i].x);
+       for(int i=0;i<n;i++)scanf("%lf",&p[i].y);
+      // ArrangeCounterClockWisePoint(p,n);
+       printf("%.1lf",PolygonArea(p,n));
    }
 
 }
@@ -266,7 +276,7 @@ bool IntersectionLines(Line l1,Line l2,Point &p)//p stores intersection point if
 	}
 
 double DistanceLineToPoint(Line l,Point p)
-{
+{// Distance of a point from a line.
     return abs(l.A*p.x+l.B+p.y-l.C)/hypot(l.A,l.B);
 }
 double Slope(Line l)// returns slope in degrees.
@@ -287,6 +297,7 @@ Line PerpendicularBisector(Line l)
 
 }
 
+// Function Definition Circles.
 int IntersectionCircleLine(Circle c,Line l1,Point& p1,Point& p2)// return number of intersection
 {// if 1 intersection stores in p1
     double x0,y0;
@@ -323,14 +334,17 @@ int IntersectionCircles(Circle c1,Circle c2,Point &p1,Point &p2)
         return 0;
     }
     Point diff(c1.x,c1.y);
-    c1.x-=diff.x,c1.y-=diff.y;
+    c1.x-=diff.x,c1.y-=diff.y;// transform circle1 to origin
     c2.x-=diff.x,c2.y-=diff.y;
     double a,b,c;
     a=2*c2.x;
     b=2*c2.y;
     c=sqr(c1.r)-sqr(c2.r)+sqr(c2.x)+sqr(c2.y);
     Line l(a,b,c);
-    return IntersectionCircleLine(c1,l,p1,p2);
+    int val= IntersectionCircleLine(c1,l,p1,p2);
+     if(val) p1=p1+diff;
+     if(val==2) p2=p2+diff;
+    return val;
 }
 int RelationCircles(Circle c1,Circle c2)// returns relation between two circles.
 {
@@ -345,7 +359,7 @@ int RelationCircles(Circle c1,Circle c2)// returns relation between two circles.
     double val=DistanceBetweenPoints(c1.Centre(),c2.Centre());
     if(val+min(c1.r,c2.r)<max(c1.r,c2.r)) return 3; // one circle inside another , no intersection.
     if(CmpDouble(val+min(c1.r,c2.r)-max(c1.r,c2.r))==0) return 4;// one circle inside another, 1 intersection point.
-    if(CmpDouble((c1.r+c2.r)-val)==1) return 5; // intersecting at 1 point.
+    if(CmpDouble((c1.r+c2.r)-val)==1) return 5; // intersecting at 2 point.
     if(CmpDouble((c1.r+c2.r)-val)==0) return 6; // touching at 1 point.
 return 7;//caircles are far apart, no intersection.
 }
@@ -358,4 +372,29 @@ int RelatonCirclePoint(Circle c,Point p)
          0 on circle boundary.
          1 outsied circle.
     */
+}
+
+/* Function definition realted to polygon */
+double PolygonArea(Point p[],int n)
+{
+    double area=0.0;
+    for(int i=1;i+1<n;i++)
+        area+=Cross(p[i]-p[0],p[i+1]-p[0]);
+    return fabs(area)/2.0;
+}
+int RelationPointPolygon(Point poly[],int n,Point p)
+{// before calling this function make sure that point are arranged in Counterclockwise/Clockwise order.
+    Point dummy(1000000,0);// take point at infinity.
+    Line l(p,dummy);//line segment.
+    int intersections=0;
+    for(int i=0;i+1<n;i++)
+    {
+        Line temp(poly[i],poly[i+1]);
+        if(PointOnSegment(temp,p)) return 0;// point lies on polygon.
+        else
+        if(DoIntersect(l,temp))
+                intersections++;
+    }
+    if(intersections&1) return -1;// point lies inside polygon.
+return 1; // point lies outside polygon.
 }
