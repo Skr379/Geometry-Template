@@ -296,7 +296,7 @@ return false;
 bool IntersectionLines(Line l1,Line l2,Point &p)//p stores intersection point if exist.
 {// returns true if line intersects else false.
 	double det = l1.A*l2.B - l2.A*l1.B;//
-   	if(det == 0) return false;
+   	if(det == 0) return false;// infinite intersection or 0.
    	else
    	{
        	double _x =(double) (l2.B*l1.C - l1.B*l2.C)/det;
@@ -327,7 +327,6 @@ Line PerpendicularBisector(Line l)
     return Line(A,B,C);// eqn of perpendicular bisector.
 
 }
-
 // Function Definition Circles.
 int IntersectionCircleLine(Circle c,Line l1,Point& p1,Point& p2)// return number of intersection
 {// if 1 intersection stores in p1
