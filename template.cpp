@@ -58,7 +58,7 @@ struct Point
 	Point(){}
 	Point(double a,double b):x(a),y(b){}
 	void in(){scanf("%lf%lf",&x,&y);}
-	void out(){printf("%lf %lf\n",x,y);}
+	void out(){printf("%.9lf %.9lf\n",x,y);}
 	bool operator == (Point b) {    return (CmpDouble(x-b.x)==0 and CmpDouble(y-b.y)==0);   }
 	bool operator < (Point b)  {	return (CmpDouble(x-b.x)==0?CmpDouble(y-b.y)<0:x<b.x);	}
 	Point operator + (Point b) {	return Point(x+b.x,y+b.y);	}
