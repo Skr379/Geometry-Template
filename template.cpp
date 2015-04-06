@@ -141,9 +141,13 @@ double x,y,r;
         Point p[3];
         p[0]=a,p[1]=b,p[2]=c;
         ArrangeCounterClockWisePoint(p,3);
+        Line l1=PerpendicularBisector(Line(p[0],p[1]));
+        Line l2=PerpendicularBisector(Line(p[1],p[2]));
         Point centre;
-        if(IntersectionLines(Line(p[0],p[1]),Line(p[1],p[2]),centre))
+        if(IntersectionLines(l1,l2,centre)){
             r=DistanceBetweenPoints(centre,p[0]);
+            x=centre.x;y=centre.y;
+        }
         else
             printf("Circle Not Possible\n");
     }
